@@ -11,6 +11,6 @@ code 会在课程结束后全部 push 上去
 ![](./result/hw1-1.gif)
 
 
-# Rigid Body With Decresing Restitution
+## Rigid Body With Decresing Restitution
 
 ![](./result/hw1-0.gif)
