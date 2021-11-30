@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: GameView
+  m_Name: SceneView
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -270,12 +270,12 @@ MonoBehaviour:
     height: 773
   m_MinSize: {x: 202, y: 221}
   m_MaxSize: {x: 4002, y: 4021}
-  m_ActualView: {fileID: 16}
+  m_ActualView: {fileID: 15}
   m_Panes:
   - {fileID: 15}
   - {fileID: 16}
-  m_Selected: 1
-  m_LastSelected: 0
+  m_Selected: 0
+  m_LastSelected: 1
 --- !u!114 &12
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -525,10 +525,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 484.6667
+    x: 485.33334
     y: 72.66667
     width: 1472
-    height: 752.3333
+    height: 752
   m_ViewDataDictionary: {fileID: 0}
   m_ShowContextualTools: 0
   m_WindowGUID: cc27987af1a868c49b0894db9c0f5429
@@ -541,9 +541,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 4.711196, y: -4.762768, z: 6.689383}
+    m_Target: {x: 8.032035, y: 3.3806696, z: 0.49722242}
     speed: 2
-    m_Value: {x: 4.711196, y: -4.762768, z: 6.689383}
+    m_Value: {x: 8.032035, y: 3.3806696, z: 0.49722242}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -590,13 +590,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.26876122, y: -0.19143164, z: 0.05459332, w: -0.94241226}
+    m_Target: {x: -0.07006075, y: -0.5042098, z: 0.041087672, w: -0.85975397}
     speed: 2
-    m_Value: {x: -0.26876125, y: -0.19143166, z: 0.054593325, w: -0.9424123}
+    m_Value: {x: -0.07006072, y: -0.5042096, z: 0.041087653, w: -0.85975355}
   m_Size:
-    m_Target: 8.378276
+    m_Target: 10.650321
     speed: 2
-    m_Value: 8.378276
+    m_Value: 10.650321
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -679,7 +679,7 @@ MonoBehaviour:
     m_HSlider: 0
     m_VSlider: 0
     m_IgnoreScrollWheelUntilClicked: 0
-    m_EnableMouseInput: 1
+    m_EnableMouseInput: 0
     m_EnableSliderZoomHorizontal: 0
     m_EnableSliderZoomVertical: 0
     m_UniformScale: 1

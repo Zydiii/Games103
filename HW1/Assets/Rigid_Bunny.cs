@@ -22,8 +22,7 @@ public class Rigid_Bunny : MonoBehaviour
 
 	private Vector3 gravity = new Vector3(0, -9.8f, 0);
 	private Vector3[] vertices;
-	private float muN = 0.2f;
-	private float muT = 0.5f;
+	private float mu = 0.5f;
 
 	private float dv;
 
@@ -108,8 +107,8 @@ public class Rigid_Bunny : MonoBehaviour
 		// 碰撞响应
 		Vector3 vn = Vector3.Dot(V, N) * N;
 		Vector3 vt = V - vn;
-		float a = Mathf.Max(1 - muT * (1 + muN) * vn.magnitude / vt.magnitude, 0);
-		vn = -muN * vn;
+		float a = Mathf.Max(1 - mu * (1 + restitution) * vn.magnitude / vt.magnitude, 0);
+		vn = -restitution * vn;
 		vt = a * vt;
 		Vector3 Vnew = vn + vt;
 
@@ -148,18 +147,19 @@ public class Rigid_Bunny : MonoBehaviour
 		tmp[2, 0] = tmp1.z;
 		tmp = I.inverse * tmp;
 		w = w + new Vector3(tmp.m00, tmp.m10, tmp.m20);
+
+		restitution *= 0.9f;
 		
 		// 衰减碰撞因子
 		if (v.magnitude < 0.01f || w.magnitude < 0.01f)
 		{
-			muN = 0;
-			muT = 0;
+			restitution = 0;
 		}
 	}
 
 	bool CollideWithPlane(Vector3 P, Vector3 N, Vector3 x)
 	{
-		return Vector3.Dot((x - P), N) - restitution < 0;
+		return Vector3.Dot((x - P), N) < 0;
 	}
 
 	// Update is called once per frame
@@ -181,9 +181,6 @@ public class Rigid_Bunny : MonoBehaviour
 		if (!launched)
 			return;
 
-		if(restitution > 0.01f)
-		    restitution /= 1.1f;
-		
 		// Part I: Update velocities
 		updateVelocity();
 		updateAngular();

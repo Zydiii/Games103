@@ -12,9 +12,8 @@ public class Rigid_Bunny_by_Shape_Matching : MonoBehaviour
 
 	private Vector3 gravity = new Vector3(0, -9.8f, 0);
 
-	float restitution = 0.1f;                   // for collision
-	private float muN = 0.2f;
-	private float muT = 0.5f;
+	float restitution = 0.5f;                   // for collision
+	private float mu = 0.5f;
 	float linear_decay = 0.999f;                // for velocity decay
 
 	// Start is called before the first frame update
@@ -161,22 +160,22 @@ public class Rigid_Bunny_by_Shape_Matching : MonoBehaviour
 
 	void Collision(float inv_dt, Vector3 P, Vector3 N, int i)
 	{
-		// Åö×²¼ì²â
-		float dis = Vector3.Dot(X[i] - P, N) - restitution;
+		// ç¢°æ’žæ£€æµ‹
+		float dis = Vector3.Dot(X[i] - P, N);
 		if (dis < 0 && Vector3.Dot(V[i], N) < 0)
 		{
 			X[i] -= dis * N;
 			Vector3 vn = Vector3.Dot(V[i], N) * N;
 			Vector3 vt = V[i] - vn;
-			float a = Mathf.Max(1 - muT * (1 + muN) * vn.magnitude / vt.magnitude, 0);
-			vn = -muN * vn;
+			float a = Mathf.Max(1 - mu * (1 + restitution) * vn.magnitude / vt.magnitude, 0);
+			vn = -restitution * vn;
 			vt = a * vt;
 			V[i] = vn + vt;
+			restitution *= 0.9f;
 		}
 		if (V[i].magnitude < 0.01f)
 		{
-			muN = 0;
-			muT = 0;
+			restitution = 0;
 		}
 	}
 
@@ -192,22 +191,22 @@ public class Rigid_Bunny_by_Shape_Matching : MonoBehaviour
 		Vector3 c = Vector3.zero;
 		for (int i = 0; i < V.Length; i++)
 		{
-			V[i] *= linear_decay; // Ë¥¼õËÙ¶È
-			V[i] += dt * gravity; // ¸üÐÂÏÂÒ»Ö¡ Vi
-			X[i] += dt * V[i]; // Ô¤²âÏÂÒ»Ö¡µÄ Xi
+			V[i] *= linear_decay; // è¡°å‡é€Ÿåº¦
+			V[i] += dt * gravity; // æ›´æ–°ä¸‹ä¸€å¸§ Vi
+			X[i] += dt * V[i]; // é¢„æµ‹ä¸‹ä¸€å¸§çš„ Xi
 			//Step 2: Perform simple particle collision.
 			//Collision(1/dt);
-			// Åö×²¼ì²âÐÞÕý Vi, Xi
+			// ç¢°æ’žæ£€æµ‹ä¿®æ­£ Vi, Xi
 			Collision(1 / dt, new Vector3(0, 0.01f, 0), new Vector3(0, 1, 0), i);
 		    Collision(1 / dt, new Vector3(2, 0, 0), new Vector3(-1, 0, 0), i);				
-			c += X[i]; // ¼ÆËãÖÐÐÄµã
+			c += X[i]; // è®¡ç®—ä¸­å¿ƒç‚¹
 		}
 
 		// Step 3: Use shape matching to get new translation c and 
 		// new rotation R. Update the mesh by c and R.
 		
 		//Shape Matching (translation)
-		c /= V.Length; // »ñµÃÖÐÐÄµã
+		c /= V.Length; // èŽ·å¾—ä¸­å¿ƒç‚¹
                        
         //Shape Matching (rotation)
         Matrix4x4 YQt = Matrix4x4.zero;
