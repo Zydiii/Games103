@@ -133,20 +133,20 @@ public class Rigid_Bunny : MonoBehaviour
 		K[3, 3] -= tmp[3, 3];
 		
 		// 计算 j
-		Matrix4x4 deltaV = Matrix4x4.identity;
-		deltaV[0, 0] = Vnew.x - V.x;
-		deltaV[1, 0] = Vnew.y - V.y;
-		deltaV[2, 0] = Vnew.z - V.z;
-		K = K.inverse * deltaV;
-		Vector3 j = new Vector3(K.m00, K.m10, K.m20);
+		// Matrix4x4 deltaV = Matrix4x4.identity;
+		// deltaV[0, 0] = Vnew.x - V.x;
+		// deltaV[1, 0] = Vnew.y - V.y;
+		// deltaV[2, 0] = Vnew.z - V.z;
+		//K = K.inverse * deltaV;
+		Vector3 j = K.inverse.MultiplyVector(Vnew - V);
 		v += j / mass;
-		Vector3 tmp1 = Vector3.Cross(Rr, j);
-		tmp = Matrix4x4.identity;
-		tmp[0, 0] = tmp1.x;
-		tmp[1, 0] = tmp1.y;
-		tmp[2, 0] = tmp1.z;
-		tmp = I.inverse * tmp;
-		w = w + new Vector3(tmp.m00, tmp.m10, tmp.m20);
+		// Vector3 tmp1 = Vector3.Cross(Rr, j);
+		// tmp = Matrix4x4.identity;
+		// tmp[0, 0] = tmp1.x;
+		// tmp[1, 0] = tmp1.y;
+		// tmp[2, 0] = tmp1.z;
+		// tmp = I.inverse * tmp; 
+		w += I.inverse.MultiplyVector(Vector3.Cross(Rr, j));
 
 		restitution *= 0.9f;
 		
