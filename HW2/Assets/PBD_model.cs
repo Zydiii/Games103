@@ -9,11 +9,16 @@ public class PBD_model: MonoBehaviour {
 	float[] 	L;
 	Vector3[] 	V;
 
-
+	private Vector3 gravity = new Vector3(0, -9.8f, 0);
+	private float radius = 2.7f;
+	private GameObject sphere;
+	private Vector3 c;
+	
 	// Use this for initialization
 	void Start () 
 	{
 		Mesh mesh = GetComponent<MeshFilter> ().mesh;
+		sphere = GameObject.Find("Sphere");
 
 		//Resize the mesh.
 		int n=21;
@@ -88,6 +93,8 @@ public class PBD_model: MonoBehaviour {
 			V[i] = new Vector3 (0, 0, 0);
 	}
 
+	#region 排序
+
 	void Quick_Sort(ref int[] a, int l, int r)
 	{
 		int j;
@@ -126,13 +133,38 @@ public class PBD_model: MonoBehaviour {
 		b = temp;
 	}
 
+	#endregion
+	
 	void Strain_Limiting()
 	{
 		Mesh mesh = GetComponent<MeshFilter> ().mesh;
 		Vector3[] vertices = mesh.vertices;
 
 		//Apply PBD here.
-		//...
+		Vector3[] sum_x = new Vector3[vertices.Length];
+		int[] sum_n = new int[vertices.Length];
+		for (int e = 0; e < E.Length / 2; e++)
+		{
+			int indexI = E[e * 2];
+			int indexJ = E[e * 2 + 1];
+			Vector3 xI = vertices[indexI];
+			Vector3 xJ = vertices[indexJ];
+
+			sum_x[indexI] += 0.5f * (xI + xJ + L[e] * (xI - xJ) / (xI - xJ).magnitude);
+			sum_x[indexJ] += 0.5f * (xI + xJ - L[e] * (xI - xJ) / (xI - xJ).magnitude);
+			sum_n[indexI]++;
+			sum_n[indexJ]++;
+		}
+
+		for (int i = 1; i < vertices.Length; i++)
+		{
+			if (i == 20)
+				continue;
+			Vector3 xNew = (0.2f * vertices[i] + sum_x[i]) / (0.2f + sum_n[i]);
+			V[i] += 1 / t * (xNew - vertices[i]);
+			vertices[i] = xNew;
+		}
+		
 		mesh.vertices = vertices;
 	}
 
@@ -142,7 +174,17 @@ public class PBD_model: MonoBehaviour {
 		Vector3[] X = mesh.vertices;
 		
 		//For every vertex, detect collision and apply impulse if needed.
-		//...
+		c = sphere.transform.position;
+		for (int i = 0; i < X.Length; i++)
+		{
+			float dis = (X[i] - c).magnitude;
+			if (dis < radius)
+			{
+				V[i] += 1 / t * (c + radius * (X[i] - c) / (X[i] - c).magnitude - X[i]);
+				X[i] = c + radius * (X[i] - c) / (X[i] - c).magnitude;
+			}
+		}
+		
 		mesh.vertices = X;
 	}
 
@@ -156,7 +198,9 @@ public class PBD_model: MonoBehaviour {
 		{
 			if(i==0 || i==20)	continue;
 			//Initial Setup
-			//...
+			V[i] += t * gravity;
+			V[i] *= damping;
+			X[i] += t * V[i];
 		}
 		mesh.vertices = X;
 

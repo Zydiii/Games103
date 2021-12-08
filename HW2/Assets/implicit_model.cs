@@ -13,8 +13,8 @@ public class implicit_model : MonoBehaviour
 	int[] 		E;
 	float[] 	L;
 	Vector3[] 	V;
+	
 	private float dt2_inverse;
-
 	private Vector3 gravity = new Vector3(0, -9.8f, 0);
 	private float radius = 2.7f;
 	private GameObject sphere;
@@ -202,10 +202,10 @@ public class implicit_model : MonoBehaviour
 		for (int i = 0; i < V.Length; i++)
 		{
 			V[i] *= damping;
-			X_hat[i] = X[i] + t * V[i];
+			X[i] = X_hat[i] = X[i] + t * V[i];
 		}
 
-		float w = 1;
+		float w = 1.0f;
 		for(int k = 0; k < 32; k++)
 		{
 			Get_Gradient(X, X_hat, t, G);
