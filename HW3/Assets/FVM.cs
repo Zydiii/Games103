@@ -34,6 +34,7 @@ public class FVM : MonoBehaviour
 	private float blendAlpha = 0.5f;
 
 	SVD svd = new SVD();
+	[Header("附加题")]
 	public bool useBonus = false;
 
     // Start is called before the first frame update
@@ -180,28 +181,35 @@ public class FVM : MonoBehaviour
 	        }
 	        else
 	        {
-		        Matrix4x4 U=Matrix4x4.zero;
-		        Matrix4x4 D=Matrix4x4.zero;
-		        Matrix4x4 V=Matrix4x4.zero;
-		        Matrix4x4 P=Matrix4x4.zero;
-		        svd.svd(F, ref U, ref D, ref V);
-		        float I		= D[0,0]*D[0,0]+D[1,1]*D[1,1]+D[2,2]*D[2,2];
-		        float J		= D[0,0]*D[1,1]*D[2,2];
-		        float II	= D[0,0]*D[0,0]*D[0,0]*D[0,0]+D[1,1]*D[1,1]*D[1,1]*D[1,1]+D[2,2]*D[2,2]*D[2,2]*D[2,2];
-		        float III	= J*J;
-		        float dEdI	= stiffness_0*(I-3)*0.25f-stiffness_1*0.5f;
-		        float dEdII	= stiffness_1*0.25f;
-		        float dEdIII= 0;
-
-		        P[0,0] = 2*dEdI*D[0,0]+4*dEdII*D[0,0]*D[0,0]*D[0,0]+2*dEdIII*III/D[0,0];
-		        P[1,1] = 2*dEdI*D[1,1]+4*dEdII*D[1,1]*D[1,1]*D[1,1]+2*dEdIII*III/D[1,1];
-		        P[2,2] = 2*dEdI*D[2,2]+4*dEdII*D[2,2]*D[2,2]*D[2,2]+2*dEdIII*III/D[2,2];
+		        Matrix4x4 U = Matrix4x4.zero;
+		        Matrix4x4 A = Matrix4x4.zero;
+		        Matrix4x4 V = Matrix4x4.zero;
+		        Matrix4x4 P = Matrix4x4.zero;
+		        svd.svd(F, ref U, ref A, ref V);
+		        float Ic = trace2(A);
+		        float IIc = trace4(A);
+		        float IIIc = det2(A);
+		        float dWdIc = 0.25f * stiffness_0 * (Ic - 3) - 0.5f * stiffness_1;
+		        float dWdIIc = 0.25f * stiffness_1;
+		        float dWdIIIc = 0;
+		        float dIcdlamda0 = 2 * A[0, 0];
+		        float dIcdlamda1 = 2 * A[1, 1];
+		        float dIcdlamda2 = 2 * A[2, 2];
+		        float dIIcdlamda0 = 4 * A[0, 0] * A[0, 0] * A[0, 0] ;
+		        float dIIcdlamda1 = 4 * A[1, 1] * A[1, 1] * A[1, 1] ;
+		        float dIIcdlamda2 = 4 * A[2, 2] * A[2, 2] * A[2, 2];
+		        float dIIIcdlamda0 = 2 * IIIc / A[0, 0];
+		        float dIIIcdlamda1 = 2 * IIIc / A[1, 1];
+		        float dIIIcdlamda2 = 2 * IIIc / A[2, 2];
+		        P[0, 0] = dWdIc * dIcdlamda0 + dWdIIc * dIIcdlamda0 + dWdIIIc * dIIIcdlamda0;
+		        P[1, 1] = dWdIc * dIcdlamda1 + dWdIIc * dIIcdlamda1 + dWdIIIc * dIIIcdlamda1;
+		        P[2, 2] = dWdIc * dIcdlamda2 + dWdIIc * dIIcdlamda2 + dWdIIIc * dIIIcdlamda2;
 		        //TODO: Elastic Force
-		        force = matrixMultiplyFloat(U * P * V.transpose*inv_Dm[tet].transpose, -1 / (inv_Dm[tet].determinant * 6));
+		        force = matrixMultiplyFloat(U * P * V.transpose * inv_Dm[tet].transpose, -1 / (inv_Dm[tet].determinant * 6));
 	        }
-	        Force[Tet[tet*4+0]].x -= force[0,0]+force[0,1]+force[0,2];
-	        Force[Tet[tet*4+0]].y -= force[1,0]+force[1,1]+force[1,2];
-	        Force[Tet[tet*4+0]].z -= force[2,0]+force[2,1]+force[2,2];
+	        Force[Tet[tet*4]].x += -1 * (force[0,0] + force[0,1] + force[0,2]);
+	        Force[Tet[tet*4]].y += -1 * (force[1,0] + force[1,1] + force[1,2]);
+	        Force[Tet[tet*4]].z += -1 * (force[2,0] + force[2,1] + force[2,2]);
 	        Force[Tet[tet*4+1]].x += force[0,0];
 	        Force[Tet[tet*4+1]].y += force[1,0];
 	        Force[Tet[tet*4+1]].z += force[2,0];
@@ -333,5 +341,20 @@ public class FVM : MonoBehaviour
     float trace(Matrix4x4 a)
     {
 	    return a[0, 0] + a[1, 1] + a[2, 2];
+    }
+
+    float trace2(Matrix4x4 a)
+    {
+	    return (float) (Math.Pow(a[0, 0], 2) + Math.Pow(a[1, 1], 2) + Math.Pow(a[2, 2], 2));
+    }
+    
+    float trace4(Matrix4x4 a)
+    {
+	    return (float) (Math.Pow(a[0, 0], 4) + Math.Pow(a[1, 1], 4) + Math.Pow(a[2, 2], 4));
+    }
+
+    float det2(Matrix4x4 a)
+    {
+	    return (float) (Math.Pow(a[0, 0], 2) * Math.Pow(a[1, 1], 2) * Math.Pow(a[2, 2], 2));
     }
 }
