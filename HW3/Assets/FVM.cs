@@ -163,6 +163,9 @@ public class FVM : MonoBehaviour
     		//TODO: Add gravity to Force.
             Force[i] = gravity * mass;
         }
+        
+        Laplacian_Smoothing();
+
 
     	for(int tet=0; tet<tet_number; tet++)
         {
@@ -221,6 +224,7 @@ public class FVM : MonoBehaviour
 	        Force[Tet[tet*4+3]].z += force[2,2];
         }
         
+        
     	for(int i = 0; i < number; i++)
     	{
     		//TODO: Update X and V here.
@@ -240,7 +244,6 @@ public class FVM : MonoBehaviour
             }
         }
         
-        Laplacian_Smoothing();
     }
     
     void Laplacian_Smoothing()
