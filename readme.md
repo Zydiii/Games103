@@ -26,3 +26,9 @@
 ### FEM
 
 ![](./result/hw3-0.gif)
+
+## Shallow Wave
+
+### Height Based Wave Equation
+
+![](./result/hw4-0.gif)
