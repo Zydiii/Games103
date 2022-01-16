@@ -6,8 +6,7 @@
 
 ![](./result/hw1-0.gif)
 
-
-### Rigid Body With Shape Macthing
+### Rigid Body With Shape Matching
 
 ![](./result/hw1-1.gif)
 
