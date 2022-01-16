@@ -1859,7 +1859,7 @@ namespace UnityEngine.UI
             for (var i = m_TrackedTexturelessImages.Count - 1; i >= 0; i--)
             {
                 var g = m_TrackedTexturelessImages[i];
-                if (spriteAtlas.CanBindTo(g.activeSprite))
+                if (null != g.activeSprite && spriteAtlas.CanBindTo(g.activeSprite))
                 {
                     g.SetAllDirty();
                     m_TrackedTexturelessImages.RemoveAt(i);

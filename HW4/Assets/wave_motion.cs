@@ -182,7 +182,6 @@ public class wave_motion : MonoBehaviour
 				cg_p[i,j]=cg_r[i,j]+beta*cg_p[i,j];
 			}
 		}
-
 	}
 
 	void Shallow_Wave(float[,] old_h, float[,] h, float [,] new_h)
@@ -221,7 +220,7 @@ public class wave_motion : MonoBehaviour
 				if (i >= 0 && j >= 0 && i < size && j < size)
 				{
 					Vector3 ray_pos_0 = block.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, -10, X[i * size + j].z));
-					Vector3 ray_pos_1 = block.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, 0, X[i * size + j].z));
+					Vector3 ray_pos_1 = block.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, -9, X[i * size + j].z));
 					Ray ray = new Ray(ray_pos_0, ray_pos_1 - ray_pos_0);
 					float dist = 99999;
 					block_bounds.IntersectRay(ray, out dist);
@@ -263,7 +262,7 @@ public class wave_motion : MonoBehaviour
 				if (i >= 0 && j >= 0 && i < size && j < size)
 				{
 					Vector3 ray_pos_0 = cube.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, -10, X[i * size + j].z));
-					Vector3 ray_pos_1 = cube.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, 0, X[i * size + j].z));
+					Vector3 ray_pos_1 = cube.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, -9, X[i * size + j].z));
 					Ray ray = new Ray(ray_pos_0, ray_pos_1 - ray_pos_0);
 					float dist = 99999;
 					cube_bounds.IntersectRay(ray, out dist);
@@ -333,46 +332,52 @@ public class wave_motion : MonoBehaviour
 		cube_force = cube_mass * gravity;
 		cube_torque = new Vector3(0, 0, 0);
         // get force and torque
-		for (int i = cube_li; i <= cube_ui; i++)
+        cube_li = (int) ((cube_pos.x + 5.0f) / 0.1) - 10;
+        cube_ui = (int) ((cube_pos.x + 5.0f) / 0.1) + 10;
+        cube_lj = (int) ((cube_pos.z + 5.0f) / 0.1) - 10;
+        cube_uj = (int) ((cube_pos.z + 5.0f) / 0.1) + 10;
+        for (int i = cube_li; i <= cube_ui; i++)
 		{
 			for (int j = cube_lj; j <= cube_uj; j++)
+			{
 				if (i >= 0 && j >= 0 && i < size && j < size)
 				{
 					Vector3 ray_pos_0 = cube.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, -10, X[i * size + j].z));
-					Vector3 ray_pos_1 = cube.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, 0, X[i * size + j].z));
-					Ray ray = new Ray(ray_pos_0, ray_pos_1 - ray_pos_0);
+					Vector3 ray_pos_1 = cube.transform.InverseTransformPoint(new Vector3(X[i * size + j].x, -9, X[i * size + j].z));
+					Ray ray = new Ray(ray_pos_0, (ray_pos_1 - ray_pos_0).normalized);
 					float dist = 99999;
 					cube_bounds.IntersectRay(ray, out dist);
 					if (vh[i, j] != 0)
 					{
-						Vector3 r = ray_pos_0 + dist * (ray_pos_1 - ray_pos_0).normalized - cube_pos;
-						Vector3 f = new Vector3(0, vh[i, j], 0) * rhoWater * Mathf.Abs(gravity.y);
-						cube_force += f;
-						cube_torque += Vector3.Cross(r, f);
+						Vector3 Rr = ray_pos_0 + dist * (ray_pos_1 - ray_pos_0).normalized - cube_pos;
+						Vector3 buoyancy = new Vector3(0, vh[i, j], 0) * rhoWater * Mathf.Abs(gravity.y); // 浮力
+						cube_force += buoyancy;
+						cube_torque += Vector3.Cross(Rr, buoyancy);
 					}
 				}
+			}
 		}
-		
-		// velocity
-		Quaternion q = cube.transform.rotation;
-		Matrix4x4 R = Matrix4x4.Rotate(q);
-		Matrix4x4 I = R * I_ref * R.transpose;
-		cube_v += cube_force * dt / cube_mass;
-		cube_v *= damping;
-		//cube_w += I.inverse.MultiplyVector(cube_torque) * dt; // 这个方法不稳定
-		cube_w += cube_torque * dt / cube_mass / 100;
-		cube_w *= damping;
-
-		// pos
-		cube.transform.position += cube_v * dt;
-
-		// rotation
-		Quaternion temp = new Quaternion(cube_w.x * dt / 2, cube_w.y * dt / 2, cube_w.z * dt / 2, 0) * q;
-		q.x += temp.x;
-		q.y += temp.y;
-		q.z += temp.z;
-		q.w += temp.w;
-		cube.transform.rotation = q;
+        
+        // velocity
+        Quaternion q = cube.transform.rotation;
+        Matrix4x4 R = Matrix4x4.Rotate(q);
+        Matrix4x4 I = R * I_ref * R.transpose;
+        cube_v += cube_force * dt / cube_mass;
+        cube_v *= 0.99f; // damping
+        //cube_w += I.inverse.MultiplyVector(cube_torque) * dt; // 这个方法不稳定
+        cube_w += cube_torque * dt / cube_mass / 100.0f;
+        cube_w *= 0.99f; // damping
+        
+        // pos
+        cube.transform.position += cube_v * dt;
+        
+        // rotation
+        Quaternion temp = new Quaternion(cube_w.x * dt / 2, cube_w.y * dt / 2, cube_w.z * dt / 2, 0) * q;
+        q.x += temp.x;
+        q.y += temp.y;
+        q.z += temp.z;
+        q.w += temp.w;
+        cube.transform.rotation = q;
 	}
 	
 
